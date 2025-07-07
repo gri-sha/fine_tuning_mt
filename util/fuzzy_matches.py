@@ -3,20 +3,35 @@ from thefuzz import fuzz, process
 from util import MIN_FUZZY_SCORE, LIMIT_NUM_FUZZY_MATCHES
 
 
-def _get_fuzzy_matches(
-    phrase, choices, limit=LIMIT_NUM_FUZZY_MATCHES, min_score=MIN_FUZZY_SCORE
+def get_fuzzy_matches(
+    phrase, choices_df, limit=LIMIT_NUM_FUZZY_MATCHES, min_score=MIN_FUZZY_SCORE
 ):
-    filtered_choices = [choice for choice in choices if choice != phrase]
-    matches = process.extract(phrase, filtered_choices, limit=limit, scorer=fuzz.ratio)
+    # Filter out the exact same phrase
+    filtered_df = choices_df[choices_df["en"] != phrase].copy()
+
+    # Get fuzzy matches against English phrases
+    matches = process.extract(
+        phrase, filtered_df["en"].tolist(), limit=limit, scorer=fuzz.ratio
+    )
+
+    # Filter by minimum score
     matches = [match for match in matches if match[1] >= min_score]
-    return matches
+
+    # Convert to the desired format: (english_phrase, french_phrase, score)
+    result = []
+    for match_phrase, score in matches:  # Skip the score
+        # Find the corresponding French phrase
+        french_phrase = filtered_df[filtered_df["en"] == match_phrase]["fr"].iloc[0]
+        result.append((match_phrase, french_phrase))
+
+    return result
 
 
 def calculate_fuzzy_matches(df):
     df["match"] = df["en"].apply(
-        lambda x: _get_fuzzy_matches(
+        lambda x: get_fuzzy_matches(
             x,
-            df["en"].tolist(),
+            df,  # pass the entire dataframe
             limit=LIMIT_NUM_FUZZY_MATCHES,
             min_score=MIN_FUZZY_SCORE,
         )
