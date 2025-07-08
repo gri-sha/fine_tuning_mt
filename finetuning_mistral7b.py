@@ -13,7 +13,7 @@ from transformers import (
     TrainingArguments,
 )
 from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
-from trl import SFTTrainer
+from trl import SFTTrainer, SFTConfig
 from pprint import pprint
 
 # %%
@@ -113,21 +113,35 @@ training_args = TrainingArguments(
     warmup_steps=0,
     logging_steps=logging_steps,
     save_strategy="epoch",
-    evaluation_strategy="epoch",
+    # evaluation_strategy="epoch",
     learning_rate=learning_rate,
     bf16=True,
     lr_scheduler_type="constant",
 )
 
 # %%
+sft_config = SFTConfig(
+    output_dir=output_dir,
+    num_train_epochs=epochs,
+    per_device_train_batch_size=batch_size,
+    per_device_eval_batch_size=batch_size,
+    warmup_steps=0,
+    logging_steps=logging_steps,
+    save_strategy="epoch",
+    # evaluation_strategy="epoch",
+    learning_rate=learning_rate,
+    bf16=True,
+    lr_scheduler_type="constant",
+    max_seq_length=max_seq_length,
+    packing=True,
+    dataset_text_field="text",
+)
+
 trainer = SFTTrainer(
     model=model,
     peft_config=peft_config,
-    max_seq_length=max_seq_length,
-    tokenizer=tokenizer,
-    packing=True,
-    dataset_text_field="text",
-    args=training_args,
+    # tokenizer=tokenizer,
+    args=sft_config,
     train_dataset=dataset["train"],
     eval_dataset=dataset["validation"],
 )
