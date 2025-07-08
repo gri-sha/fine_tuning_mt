@@ -7,6 +7,7 @@ asttokens==3.0.0
 async-timeout==5.0.1
 attrs==25.3.0
 beautifulsoup4==4.13.4
+bitsandbytes==0.42.0
 bleach==6.2.0
 certifi==2025.6.15
 charset-normalizer==3.4.2
@@ -72,6 +73,7 @@ regex==2024.11.6
 requests==2.32.4
 rpds-py==0.26.0
 safetensors==0.5.3
+scipy==1.13.1
 six==1.17.0
 soupsieve==2.7
 stack-data==0.6.3
