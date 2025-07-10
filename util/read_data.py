@@ -43,34 +43,35 @@ def _create_df() -> pd.DataFrame:
     return df
 
 
-def initialize_df() -> pd.DataFrame:
+def initialize_dfs(test: float) -> pd.DataFrame:
     if os.path.exists(TARGET_PATH):
-        print("Constructed dataframe found. Reading source...")
+        print("Loading existing dataframe...")
         df = pd.read_csv(TARGET_PATH)
         df["match"] = df["match"].apply(ast.literal_eval)
         if not df.empty:
-            print("Non-empty dataframe read.")
-            return df
+            print("Dataframe loaded.")
+            split = int(len(df) * (1 - test))
+            df_train, df_test = df[:split], df[split:]
+            df_test = df_test.reset_index(drop=True)
+            print(f"Split at index {split}.")
+            return (df_train, df_test)
         else:
-            print("Empty dataframe is read, reconstructing...")
+            print("Dataframe is empty. Rebuilding...")
     else:
-        print("No constructed dataframe found. Reading sources...")
+        print("No existing dataframe. Creating new one...")
 
     df = _create_df()
-    print("Calculating fuzzy-matches...")
+    print("Running fuzzy matching...")
     df = calculate_fuzzy_matches(df)
     df.to_csv(TARGET_PATH, index=False)
-    print("Dataframe created")
+    print("Done.")
+    split = int(len(df) * (1 - test))
+    df_train, df_test = df[:split], df[split:]
+    df_test = df_test.reset_index(drop=True)
+    print(f"Split at index {split}.")
+    return (df_train, df_test)
 
-    return df
 
-
-def split_dataset(dataset: Dataset, train, test, validation) -> DatasetDict:
-    dataset = dataset.train_test_split(test_size=test, shuffle=True)
-    dataset["train"], dataset["validation"] = (
-        dataset["train"]
-        .train_test_split(test_size=(validation / train), shuffle=True)
-        .values()
-    )
-
-    return dataset
+def validation_split(dataset: Dataset, validation: float) -> DatasetDict:
+    split = dataset.train_test_split(test_size=validation, shuffle=True)
+    return DatasetDict({"train": split["train"], "validation": split["test"]})
