@@ -28,10 +28,12 @@ def generate_training_prompts(
 
 def generate_eval_prompts(
     df: DataFrame, shots: int = 0, fuzzy: bool = True
-) -> tuple[list[str], list[str]]:
+) -> tuple[list[str], list[str], list[str]]:
     """
-    Returns a list of tuples in the format (reference, prompt),
-    where 'reference' is the English sentence and 'prompt' is the constructed prompt.
+    Returns a tuple of lists:
+    - list of English sentences (sources),
+    - list of French translated sentneces (references),
+    - list of constructed prompts,
     """
     if shots < 0:
         raise ValueError('Argument "shots" must be non-negative integer')
@@ -50,7 +52,7 @@ def generate_eval_prompts(
                     prompt += f'English: {df["en"][idx]}\nFrench: {df["fr"][idx]}\n'
         prompt += f'English: {df["en"][i]}\nFrench: '
         prompts.append(prompt)
-    return df["en"].to_list(), prompts
+    return df["en"].to_list(), df["fr"].to_list(), prompts
 
 
 # def generate_instructive_prompt(target: str, examples: list[tuple[str]] = []) -> str:
