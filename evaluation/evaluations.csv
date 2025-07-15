@@ -1,0 +1,2 @@
+name,BLEU,chrF++,TER,COMET
+mistral7b_v1,30.77,56.29,82.58,-5.9
