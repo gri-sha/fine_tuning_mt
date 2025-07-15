@@ -2,7 +2,7 @@ from pandas import DataFrame
 import random
 
 
-def generate_training_prompts(
+def generate_simple_training_prompts(
     df: DataFrame, shots: int = 0, fuzzy: bool = True
 ) -> list[str]:
     """
@@ -26,7 +26,7 @@ def generate_training_prompts(
     return prompts
 
 
-def generate_eval_prompts(
+def generate_simple_eval_prompts(
     df: DataFrame, shots: int = 0, fuzzy: bool = True
 ) -> tuple[list[str], list[str], list[str]]:
     """

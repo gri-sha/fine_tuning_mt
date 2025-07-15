@@ -2,7 +2,7 @@ import os
 import ast
 import pandas as pd
 from datasets import Dataset, DatasetDict
-from util import MIN_LENGTH, TARGET_PATH
+from util import MIN_LENGTH, TARGET_PATH, _project_root
 from .fuzzy_matches import calculate_fuzzy_matches
 
 
@@ -12,8 +12,8 @@ def _create_df() -> pd.DataFrame:
 
     df = pd.DataFrame([], columns=["en", "fr"])
 
-    en = open(f"data/all_en.txt", "r")
-    fr = open(f"data/all_fr.txt", "r")
+    en = open(os.path.join(_project_root, "data/all_en.txt"), "r")
+    fr = open(os.path.join(_project_root, "data/all_fr.txt"), "r")
 
     while True:
         en_line = en.readline()
@@ -43,10 +43,12 @@ def _create_df() -> pd.DataFrame:
     return df
 
 
-def initialize_dfs(test: float) -> pd.DataFrame:
-    if os.path.exists(TARGET_PATH):
+def initialize_dfs(test: float) -> tuple[pd.DataFrame]:
+    data_dir = os.path.join(_project_root, TARGET_PATH)
+
+    if os.path.exists(data_dir):
         print("Loading existing dataframe...")
-        df = pd.read_csv(TARGET_PATH)
+        df = pd.read_csv(data_dir)
         df["match"] = df["match"].apply(ast.literal_eval)
         if not df.empty:
             print("Dataframe loaded.")
@@ -63,7 +65,7 @@ def initialize_dfs(test: float) -> pd.DataFrame:
     df = _create_df()
     print("Running fuzzy matching...")
     df = calculate_fuzzy_matches(df)
-    df.to_csv(TARGET_PATH, index=False)
+    df.to_csv(data_dir, index=False)
     print("Done.")
     split = int(len(df) * (1 - test))
     df_train, df_test = df[:split], df[split:]

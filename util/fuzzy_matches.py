@@ -27,7 +27,7 @@ def get_fuzzy_matches(
     return result
 
 
-def calculate_fuzzy_matches(df):
+def calculate_fuzzy_matches(df: pd.DataFrame) -> pd.DataFrame:
     df["match"] = df["en"].apply(
         lambda x: get_fuzzy_matches(
             x,
