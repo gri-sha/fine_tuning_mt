@@ -13,5 +13,5 @@ LIMIT_NUM_FUZZY_MATCHES = _config["limit_num_fuzzy_matches"]
 TARGET_PATH = _config["target_path"]
 
 from .read_data import initialize_dfs, validation_split
-from .prompts import generate_simple_training_prompts, generate_simple_eval_prompts
+from .prompts import generate_instruction_prompts
 from .login import login_to_hf
