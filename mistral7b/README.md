@@ -4,17 +4,11 @@
 
 ### V1 & V2
 - **Format**: Language modeling
-- **Features**: Single "text" feature in dataset (prompt and completion are concatenated)
-- **Tokens**: No special formatting tokens (`<s>`, `</s>`, `<INST>`, `</INST>`)
-- **Structure**: Unified format without explicit delimiters
-
-**Note**: This format is **unsupported** by SFTTrainer but matches the original research implementation.
+- **Features**: Single "text" feature in dataset (prompt and completion are concatenated), without special formatting tokens (`<s>`, `</s>`, `<INST>`, `</INST>`)
 
 ### V3
 - **Format**: Instruction
 - **Features**: `{"prompt": "<prompt text>", "completion": "<ideal generated text>"}`
-- **Compatibility**: Fully supported by SFTTrainer (TRL 0.19.1 and 0.7.10)
-- **Performance**: Expected to yield better results
 
 ## References
 
