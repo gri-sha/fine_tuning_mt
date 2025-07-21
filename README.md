@@ -121,7 +121,7 @@ python3 evaluate/evaluate.py
 ```
 
 ## Notes
-- For long-running processes, it's recommended to use `screen` or `tmux` to maintain sessions
-- Check the model-specific READMEs in `finetune/mistral7b/` and `finetune/mt5/` for additional configuration details
-- Evaluation results will be saved in `evaluate/evaluations.csv`
-- 
+- For convinience it it better to run all the scripts from the **project root**
+- For long-running processes (fine-tuning and translation), it's recommended to use `screen` or `tmux` to maintain sessions
+- Check the model-specific shell scripts in `finetune/mistral7b/` and `finetune/mt5/` for additional configuration details
+- Evaluation results are saved in `evaluate/evaluations.csv`

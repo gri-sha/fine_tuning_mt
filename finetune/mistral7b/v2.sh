@@ -3,7 +3,7 @@
 OUTPUT_DIR="sft_checkpoints/mistral7b/v2"
 mkdir -p "$OUTPUT_DIR"
 
-python3 finetuning.py \
+python3 finetune/finetuning.py \
     --model-name "mistralai/Mistral-7B-v0.1" \
     --output-dir "$OUTPUT_DIR" \
     --epochs 2 \

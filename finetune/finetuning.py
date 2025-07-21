@@ -1,6 +1,5 @@
-#!/usr/bin/env python3
-
 import os
+import sys
 import json
 from pathlib import Path
 from pprint import pprint
@@ -14,6 +13,10 @@ from transformers import (
 )
 from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
 from trl import SFTTrainer, SFTConfig
+
+from pathlib import Path
+project_root = Path(__file__).parent.parent
+sys.path.append(str(project_root))
 from util import (
     generate_instruction_prompts,
     initialize_dfs,

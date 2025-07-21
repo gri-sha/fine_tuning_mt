@@ -5,7 +5,7 @@ import sacrebleu
 import pandas as pd
 
 
-with open("tevaluate/eval_config.yml", "r") as f:
+with open("evaluate/eval_config.yml", "r") as f:
     eval_config = yaml.safe_load(f)
 
 df = pd.read_csv(eval_config["translations_path"])
@@ -37,7 +37,9 @@ print("TER:", ter)
 df = pd.DataFrame({"src": sources, "mt": translations, "ref": references})
 data = df.to_dict("records")
 
-model_path = os.path.join(eval_config["comet_dir"], eval_config["comet_model_name"], "checkpoints/model.ckpt")
+model_path = os.path.join(
+    eval_config["comet_dir"], eval_config["comet_model_name"], "checkpoints/model.ckpt"
+)
 if not os.path.exists(model_path):
     model_path = comet.download_model(
         model=eval_config["comet_model_name"], saving_directory=eval_config["comet_dir"]

@@ -1,4 +1,5 @@
 import os
+import sys
 import yaml
 import torch
 import pandas as pd
@@ -7,6 +8,10 @@ from peft import PeftModel, PeftConfig
 from transformers import set_seed, AutoModelForCausalLM, AutoTokenizer
 from datasets import Dataset
 from pprint import pprint
+
+from pathlib import Path
+project_root = Path(__file__).parent.parent
+sys.path.append(str(project_root))
 from util import generate_instruction_prompts, initialize_dfs
 
 with open("translate/translations_config.yml", "r") as f:
@@ -28,7 +33,7 @@ dataset = Dataset.from_dict(
 pprint(dataset)
 
 
-peftconfig = PeftConfig.from_pretrained(tr_config["model_checkpoint"])
+peftconfig = PeftConfig.from_pretrained(tr_config["checkpoint_path"])
 
 model_base = AutoModelForCausalLM.from_pretrained(
     peftconfig.base_model_name_or_path, device_map="auto", cache_dir=cache_dir
@@ -41,7 +46,7 @@ tokenizer = AutoTokenizer.from_pretrained(
     add_eos_token=tr_config["eos_token"],  # always False for inference
 )
 tokenizer.pad_token = tokenizer.eos_token
-model = PeftModel.from_pretrained(model_base, tr_config["model_checkpoint"])
+model = PeftModel.from_pretrained(model_base, tr_config["checkpoint_path"])
 print("Peft model loaded")
 
 
