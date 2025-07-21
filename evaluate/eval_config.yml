@@ -1,0 +1,5 @@
+translations_path: "translations/mistral7b_v2_translations.csv"
+evaluations_path: "evaluation/evaluations.csv"
+eval_name: "mistral7b_v2"
+comet_dir: "comet"
+comet_model_name: "wmt20-comet-da"
