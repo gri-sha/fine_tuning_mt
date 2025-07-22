@@ -15,9 +15,6 @@ python3 finetune/finetuning.py \
     --warmup-steps 0 \
     --eval-strategy "epoch" \
     --eval-steps "" \
-    --seed 1212 \
-    --test-split 0.1 \
-    --valid-split 0.05 \
     --shots "0 1" \
     --fuzzy "f t" \
     --bos_token "true" \

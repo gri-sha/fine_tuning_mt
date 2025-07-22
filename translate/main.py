@@ -12,16 +12,18 @@ from pprint import pprint
 from pathlib import Path
 project_root = Path(__file__).parent.parent
 sys.path.append(str(project_root))
-from util import generate_instruction_prompts, initialize_dfs
+from util import generate_instruction_prompts, initialize_dfs, SEED, TEST_SPLIT
 
 with open("translate/translations_config.yml", "r") as f:
     tr_config = yaml.safe_load(f)
 
 cache_dir = os.path.expanduser("~/.cache/huggingface/")
 
-set_seed(tr_config["seed"])
+# we set the seed not for splits but for model initialization
+# test split is done by index
+set_seed(SEED)  
 
-_, df_test = initialize_dfs(test=tr_config["test_split"])
+_, df_test = initialize_dfs(test=TEST_SPLIT)
 s0, p0, r0 = generate_instruction_prompts(df_test, shots=0)
 s1, p1, r1 = generate_instruction_prompts(df_test, shots=1, fuzzy=True)
 sources = s0 + s1

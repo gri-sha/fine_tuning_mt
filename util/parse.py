@@ -8,9 +8,6 @@ def parse_arguments():
     parser.add_argument("--output-dir", type=str)
 
     # Data parameters
-    parser.add_argument("--seed", type=int, default=1212)
-    parser.add_argument("--test-split", type=float, default=0.1)
-    parser.add_argument("--valid-split", type=float, default=0.05)
     parser.add_argument("--shots", type=str, default="0")
     parser.add_argument("--fuzzy", type=str, default="false")
     parser.add_argument("--bos_token", type=str, default="true")

@@ -11,13 +11,10 @@ python3 finetune/finetuning.py \
     --batch-size 64 \
     --max-seq-length 512 \
     --logging-steps 32 \
-    --completion-only-loss "false" \
+    --completion-only-loss "true" \
     --warmup-steps 0 \
     --eval-strategy "steps" \
     --eval-steps 96 \
-    --seed 1212 \
-    --test-split 0.1 \
-    --valid-split 0.05 \
     --shots "0 1" \
     --fuzzy "f t" \
     --bos_token "true" \

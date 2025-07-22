@@ -27,6 +27,9 @@ from util import (
     str_to_bool,
     read_shots,
     read_fuzzy,
+    SEED,
+    TEST_SPLIT,
+    VALID_SPLIT,
 )
 
 args = parse_arguments()
@@ -39,50 +42,26 @@ Path(output_dir).mkdir(parents=True, exist_ok=True)
 
 # Print configuration
 print("Training Configuration:")
-print(f"\tModel: {args.model_name}")
-print(f"\tOutput Directory: {args.output_dir}")
-print(f"\tEpochs: {args.epochs}")
-print(f"\tLearning Rate: {args.learning_rate}")
-print(f"\tBatch Size: {args.batch_size}")
-print(f"\tMax Sequence Length: {args.max_seq_length}")
-print(f"\tLogging Steps: {args.logging_steps}")
-print(f"\tWarmup Steps: {args.warmup_steps}")
-print(f"\tEval Strategy: {args.eval_strategy}")
-print(f"\tEval Steps: {args.eval_steps}")
-print(f"\tCompletion Only Loss: {str_to_bool(args.completion_only_loss)}")
-print(f"\tShots: {read_shots(args.shots)}")
-print(f"\tFuzzy: {read_fuzzy(args.fuzzy)}")
-print(f"\tBOS Token: {str_to_bool(args.bos_token)}")
-print(f"\tEOS Token: {str_to_bool(args.eos_token)}")
-print(f"\tPad Side: {args.pad_side}")
-print(f"\tPacking: {str_to_bool(args.packing)}")
-print(f"\tSeed: {args.seed}")
-print(f"\tTest Split: {args.test_split}")
-print(f"\tValid Split: {args.valid_split}")
-print(f"\tLoRA Alpha: {args.lora_alpha}")
-print(f"\tLoRA Dropout: {args.lora_dropout}")
-print(f"\tLoRA Rank: {args.lora_rank}")
-print(f"\tLoRA Bias: {args.lora_bias}")
-print(f"\tLoRA Task: {args.lora_task}", "\n")
+pprint(args.__dict__)
 
 # Print dataframe configuration
-print("Dataframe configuration:")
+print("\nDataframe configuration:")
 pprint(_config)
-
-# Set seed
-set_seed(args.seed)
 
 # Login to Hugging Face
 login_to_hf()
 
 # Check CUDA availability
 if not torch.cuda.is_available():
-    print("Warning: CUDA is not available.", "\n")
+    print("\nWarning: CUDA is not available.", "\n")
 else:
-    print(f"CUDA device: {torch.cuda.get_device_name(0)}", "\n")
+    print(f"\nCUDA device: {torch.cuda.get_device_name(0)}", "\n")
+
+# Set seed
+set_seed(SEED)
 
 # Load data
-df_train, _ = initialize_dfs(test=args.test_split)
+df_train, _ = initialize_dfs(test=TEST_SPLIT)
 prompts = []
 completions = []
 
@@ -94,7 +73,7 @@ for s, f in zip(shots, fuzzy):
     completions.extend(c)
 
 dataset = Dataset.from_dict({"prompt": prompts, "completion": completions})
-dataset = validation_split(dataset, validation=args.valid_split)
+dataset = validation_split(dataset, validation=VALID_SPLIT)
 pprint(dataset)
 
 # Load and setup model
@@ -135,7 +114,7 @@ peft_config = LoraConfig(
 
 model = prepare_model_for_kbit_training(model)
 model = get_peft_model(model, peft_config)
-print(f"Model device: {next(model.parameters()).device}")
+print(f"\nModel device: {next(model.parameters()).device}", "\n")
 
 # Setup training
 eval_steps = None

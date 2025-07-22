@@ -2,3 +2,6 @@ min_sentence_length: 10
 min_fuzzy_score: 20 
 limit_num_fuzzy_matches: 10
 target_path: data/all.csv
+seed: 1212
+test_split: 0.1
+valid_split: 0.05

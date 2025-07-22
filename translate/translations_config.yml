@@ -4,8 +4,5 @@ translations_dir: "translate/translations/"
 translations_file: "mistral7b_v2_translations.csv"
 max_new_tokens: 30
 bath_size: 16
-seed: 1212
-test_split: 0.1
-valid_split: 0.05
 bos_token: true
 eos_token: false

@@ -2,59 +2,7 @@
 
 ## Overview
 This repository provides scripts for fine-tuning machine translation models (Mistral-7B and mT5) on a custom dataset.
-The fine-tuned models are tested and evaluated, with comparisons against reference translations from DeepL and ChatGPT.
-
-## Repository Structure
-```
-.
-├── data/                        # Dataset files
-│   ├── all_en.txt
-│   ├── all_fr.txt
-│   ├── all.csv 
-│   └── README.md 
-│
-├── finetune/                    
-│   ├── finetuning.py            # Fine-tuning core logic
-│   ├── mistral7b/               # Mistral-7B specific scripts
-│   │   ├── README.md
-│   │   ├── v1.sh           
-│   │   ├── v2.sh           
-│   │   └── v3.sh           
-│   └── mt5/                     # mT5 specific scripts
-│       ├── README.md
-│       ├── v1.sh           
-│       └── v2.sh           
-│
-├── evaluate/
-│   ├── eval_config.yml          
-│   ├── evaluate.py              # Main evaluation script
-│   └── evaluations.csv          
-│
-├── translate/
-│   ├── generate_translation.py
-│   ├── translate_with_deepl.py
-│   ├── translate.py             # Main translation script
-│   ├── translations/            
-│   │   ├── mistral7b_v1_translations.csv
-│   │   ├── mistral7b_v2_translations.csv
-│   │   ├── mistral7b_v3_translations.csv
-│   │   ├── mt5_v1_translations.csv
-│   │   └── mt5_v2_translations.csv
-│   └── translations_config.yml
-│
-├── util/
-│   ├── __init__.py
-│   ├── convert.py
-│   ├── dataset_config.yml
-│   ├── fuzzy_matches.py
-│   ├── login.py
-│   ├── parse.py
-│   ├── prompts.py
-│   └── read_data.py
-│
-├── README.md
-└── requirements.txt
-```
+The fine-tuned models are tested and evaluated, with comparisons against reference translations from DeepL and MistralAI (Mistral Medium).
 
 ## Quick Start
 
@@ -106,7 +54,7 @@ source .venv/bin/activate
 
 3. Run the translation script:
 ```bash
-nohup python3 translate/translate.py &
+nohup python3 translate/main.py &
 ```
 
 4. Detach from the screen session with `Ctrl+A+D`
@@ -117,7 +65,7 @@ nohup python3 translate/translate.py &
 
 2. Run the evaluation script:
 ```bash
-python3 evaluate/evaluate.py
+python3 evaluate/main.py
 ```
 
 ## Notes

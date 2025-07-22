@@ -6,18 +6,15 @@ mkdir -p "$OUTPUT_DIR"
 python3 finetune/finetuning.py \
     --model-name "mistralai/Mistral-7B-v0.1" \
     --output-dir "$OUTPUT_DIR" \
-    --epochs 2 \
-    --learning-rate 2e-3 \
-    --batch-size 64 \
+    --epochs 1 \
+    --learning-rate 1e-4 \
+    --batch-size 32 \
     --max-seq-length 512 \
-    --logging-steps 32 \
+    --logging-steps 20 \
     --completion-only-loss "false" \
     --warmup-steps 0 \
-    --eval-strategy "steps" \
-    --eval-steps 96 \
-    --seed 1212 \
-    --test-split 0.1 \
-    --valid-split 0.05 \
+    --eval-strategy "epoch" \
+    --eval-steps "" \
     --shots "0 1" \
     --fuzzy "f t" \
     --bos_token "true" \

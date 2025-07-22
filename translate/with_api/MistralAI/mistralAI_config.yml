@@ -1,0 +1,4 @@
+model: "mistral-medium-latest"
+max_tokens: 30
+temperature: 0.7
+system_prompt: "You are a helpful assistant that translates English to French. Output only the french sentence no explanations."
