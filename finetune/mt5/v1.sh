@@ -18,9 +18,9 @@ python3 finetune/finetuning.py \
     --shots "0 1" \
     --fuzzy "f t" \
     --bos_token "true" \
-    --eos-token "false" \
+    --eos-token "true" \
     --pad-side "right" \
-    --packing "true" \
+    --packing "false" \
     --lora-alpha 16 \
     --lora-dropout 0.1 \
     --lora-rank 64 \
