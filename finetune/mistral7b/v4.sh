@@ -1,6 +1,6 @@
 #!/bin/bash
 
-OUTPUT_DIR="sft_checkpoints/mistral7b/v3"
+OUTPUT_DIR="sft_checkpoints/mistral7b/v4"
 mkdir -p "$OUTPUT_DIR"
 
 python3 finetune/finetuning.py \

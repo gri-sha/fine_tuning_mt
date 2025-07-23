@@ -1,12 +1,12 @@
 #!/bin/bash
 
-OUTPUT_DIR="sft_checkpoints/mt5/v1"
+OUTPUT_DIR="sft_checkpoints/mt5/v2"
 mkdir -p "$OUTPUT_DIR"
 
 python3 finetune/finetuning.py \
     --model-name "google/mt5-xl" \
     --output-dir "$OUTPUT_DIR" \
-    --epochs 1 \
+    --epochs 2 \
     --learning-rate 2e-3 \
     --batch-size 64 \
     --max-seq-length 512 \
