@@ -26,3 +26,5 @@ python3 finetune/finetuning.py \
     --lora-rank 64 \
     --lora-bias "none" \
     --lora-task "CAUSAL_LM"
+
+# max_tokens for translation of the test dataset: 30

@@ -25,4 +25,4 @@ python3 finetune/finetuning.py \
     --lora-dropout 0.1 \
     --lora-rank 64 \
     --lora-bias "none" \
-    --lora-task "CAUSAL_LM"
+    --lora-task "SEQ_2_SEQ_LM"

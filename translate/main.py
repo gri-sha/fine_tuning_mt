@@ -80,4 +80,4 @@ os.makedirs(tr_config["translations_dir"], exist_ok=True)
 translations_df = pd.DataFrame(
     {"sources": sources, "references": references, "translations": translations}
 )
-translations_df.to_csv(os.path.join(tr_config["translations_dir"], tr_config["translations_name"]), index=False)
+translations_df.to_csv(os.path.join(tr_config["translations_dir"], tr_config["translations_file"]), index=False)

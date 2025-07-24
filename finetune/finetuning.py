@@ -9,12 +9,13 @@ from transformers import (
     set_seed,
     AutoTokenizer,
     AutoModelForCausalLM,
+    AutoModelForSeq2SeqLM,
     BitsAndBytesConfig,
 )
 from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
 from trl import SFTTrainer, SFTConfig
-
 from pathlib import Path
+
 project_root = Path(__file__).parent.parent
 sys.path.append(str(project_root))
 from util import (
@@ -85,14 +86,26 @@ nf4_config = BitsAndBytesConfig(
 )
 
 # if there is an error, that directories related to cuda are not found, the easiest solution is to reinstall bitsandbytes
-model = AutoModelForCausalLM.from_pretrained(
-    args.model_name,
-    device_map="auto",
-    quantization_config=nf4_config,
-    use_cache=False,
-    cache_dir=cache_dir,
-    # attn_implementation='flash_attention_2'  # not compatible with current versions of torch and cuda
-)
+if args.lora_task == "CAUSAL_LM":
+    model = AutoModelForCausalLM.from_pretrained(
+        args.model_name,
+        device_map="auto",
+        quantization_config=nf4_config,
+        use_cache=False,
+        cache_dir=cache_dir,
+        # attn_implementation='flash_attention_2'  # not compatible with current versions of torch and cuda
+    )
+elif args.lora_task == "SEQ_2_SEQ_LM":
+    model = AutoModelForSeq2SeqLM.from_pretrained(
+        args.model_name,
+        device_map="auto",
+        quantization_config=nf4_config,
+        use_cache=False,
+        cache_dir=cache_dir,
+        # attn_implementation='flash_attention_2'  # not compatible with current versions of torch and cuda
+    )
+else:
+    raise ValueError("LoRA task type is not supported yet.")
 
 tokenizer = AutoTokenizer.from_pretrained(
     args.model_name,

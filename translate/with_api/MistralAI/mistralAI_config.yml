@@ -5,3 +5,9 @@ system_prompt_0shot: "You are a helpful assistant that translates English to Fre
 system_prompt_few_shot: "You are a helpful assistant that translates English to French. Output only the french sentence no explanations. Use the examples provided."
 translations_dir: "translate/translations/"
 translations_file: "mistral_medium_translations.csv"
+batch_dir: "translate/with_api/MistralAI/batches"
+batch_file: "batch.jsonl"
+batch_results_file: "batch_results.jsonl"
+batch_name: "test.jsonl"
+endpoint: "/v1/chat/completions"
+check_interval: 5
