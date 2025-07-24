@@ -1,0 +1,6 @@
+batch_size: 50
+formality: "prefer_less"
+preserve_formatting: true
+model_type: "quality_optimized"
+translations_dir: "translate/translations/"
+translations_file: "deepl_translations.csv"
