@@ -1,22 +1,22 @@
 #!/bin/bash
 
-OUTPUT_DIR="sft_checkpoints/mt5/v1"
+OUTPUT_DIR="sft_checkpoints/mistral7b/v4"
 mkdir -p "$OUTPUT_DIR"
 
 python3 finetune/finetuning.py \
-    --model-name "google/mt5-xl" \
+    --model-name "mistralai/Mistral-7B-v0.3" \
     --output-dir "$OUTPUT_DIR" \
-    --epochs 1 \
+    --epochs 3 \
     --learning-rate 2e-3 \
-    --batch-size 32 \
+    --batch-size 64 \
     --max-seq-length 512 \
-    --logging-steps 32 \
+    --logging-steps 24 \
     --completion-only-loss "true" \
     --warmup-steps 0 \
     --eval-strategy "steps" \
-    --eval-steps 96 \
-    --shots "0 1" \
-    --fuzzy "f t" \
+    --eval-steps 64 \
+    --shots "0 1 2" \
+    --fuzzy "f t t" \
     --bos_token "true" \
     --eos-token "true" \
     --pad-side "right" \
@@ -25,4 +25,4 @@ python3 finetune/finetuning.py \
     --lora-dropout 0.1 \
     --lora-rank 64 \
     --lora-bias "none" \
-    --lora-task "SEQ_2_SEQ_LM"
+    --lora-task "CAUSAL_LM"

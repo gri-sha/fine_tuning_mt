@@ -8,7 +8,7 @@ python3 finetune/finetuning.py \
     --output-dir "$OUTPUT_DIR" \
     --epochs 2 \
     --learning-rate 2e-3 \
-    --batch-size 64 \
+    --batch-size 32 \
     --max-seq-length 512 \
     --logging-steps 32 \
     --completion-only-loss "true" \
