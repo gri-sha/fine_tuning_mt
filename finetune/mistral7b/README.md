@@ -1,20 +1,18 @@
-# Machine Translation Fine-tuning of Mistral-7B-v0.1
+## Machine Translation Fine-tuning of Mistral-7B
 
-## Versions
-
-### V1 & V2
-- **Format**: Language modeling
-- **Features**: Single "text" feature in dataset (prompt and completion are concatenated), without special formatting tokens (`<s>`, `</s>`, `<INST>`, `</INST>`)
-
-### V3
-- **Format**: Instruction
-- **Features**: `{"prompt": "<prompt text>", "completion": "<ideal generated text>"}`
+| Version | Base Model | Prompt Format | Quant. | Epochs | Shots Included | Packing | Batch Size | Learning Rate | Notes |
+| -- | -- | -- | -- | -- | -- | -- | -- | -- | -- |
+| **V1** | v0.1 | Language modeling | 4-bit | 1 | 0, 1 | Yes | 32 | 1e-4 | <ul><li>Poor results</li><li>FlashAttention 2 incompatible</li></ul> |
+| **V2** | v0.1 | Language modeling | 4-bit | 1 | 0, 1 | Yes | 32 | 2e-3 | <ul><li>Poor results</li><li>FlashAttention 2 incompatible</li></ul> |
+| **V3** | v0.1 | Instruction | 4-bit | 2 | 0, 1 | No | 64     | 2e-3 | <ul><li>Poor results</li><li>FlashAttention 2 incompatible</li><li>More validation</li></ul> |
+| **V4** | v0.1 | Instruction | 4-bit | 3 | 0, 1, 2 | No | 64 | 2e-3 | <ul><li>Improved setup</li></ul> |
+| **V5** | v0.3 | Instruction | 4-bit | 3 | 0, 1, 2 | No | 64 | 2e-3 | <ul><li>Updated model version</li></ul> |
 
 ## References
 
-- Moslem et al. (2023). [Adaptive Machine Translation with Large Language Models](https://doi.org/10.48550/arXiv.2301.13294)
-- Moslem et al. (2023). [Fine-tuning Large Language Models for Adaptive Machine Translation](https://doi.org/10.48550/arXiv.2312.12740)
+* Moslem et al. (2023). [Adaptive Machine Translation with LLMs](https://doi.org/10.48550/arXiv.2301.13294)
+* Moslem et al. (2023). [Fine-tuning LLMs for Adaptive MT](https://doi.org/10.48550/arXiv.2312.12740)
 
 ## Implementation
 
-Based on: [ymoslem/Adaptive-MT-LLM-Fine-tuning](https://github.com/ymoslem/Adaptive-MT-LLM-Fine-tuning)
+* Based on: [ymoslem/Adaptive-MT-LLM-Fine-tuning](https://github.com/ymoslem/Adaptive-MT-LLM-Fine-tuning)

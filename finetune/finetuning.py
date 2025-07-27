@@ -10,7 +10,6 @@ from transformers import (
     AutoTokenizer,
     AutoModelForCausalLM,
     AutoModelForSeq2SeqLM,
-    BitsAndBytesConfig,
 )
 from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
 from trl import SFTTrainer, SFTConfig
@@ -25,6 +24,7 @@ from util import (
     login_to_hf,
     _config,
     parse_arguments,
+    get_bnb_config,
     str_to_bool,
     read_shots,
     read_fuzzy,
@@ -33,6 +33,7 @@ from util import (
     VALID_SPLIT,
 )
 
+# Load arguments
 args = parse_arguments()
 
 output_dir = args.output_dir
@@ -41,13 +42,12 @@ logs_path = os.path.join(output_dir, "logs.json")
 
 Path(output_dir).mkdir(parents=True, exist_ok=True)
 
-# Print configuration
-print("Training Configuration:")
-pprint(args.__dict__)
-
-# Print dataframe configuration
+# Print configs
 print("\nDataframe configuration:")
 pprint(_config)
+
+print("Training Configuration:")
+pprint(args.__dict__)
 
 # Login to Hugging Face
 login_to_hf()
@@ -77,20 +77,14 @@ dataset = Dataset.from_dict({"prompt": prompts, "completion": completions})
 dataset = validation_split(dataset, validation=VALID_SPLIT)
 pprint(dataset)
 
-# Load and setup model
-nf4_config = BitsAndBytesConfig(
-    load_in_4bit=True,
-    bnb_4bit_quant_type="nf4",
-    bnb_4bit_use_double_quant=True,
-    bnb_4bit_compute_dtype=torch.bfloat16,
-)
+quant_config = get_bnb_config(args)
 
 # if there is an error, that directories related to cuda are not found, the easiest solution is to reinstall bitsandbytes
 if args.lora_task == "CAUSAL_LM":
     model = AutoModelForCausalLM.from_pretrained(
         args.model_name,
         device_map="auto",
-        quantization_config=nf4_config,
+        quantization_config=quant_config,
         use_cache=False,
         cache_dir=cache_dir,
         # attn_implementation='flash_attention_2'  # not compatible with current versions of torch and cuda
@@ -99,7 +93,7 @@ elif args.lora_task == "SEQ_2_SEQ_LM":
     model = AutoModelForSeq2SeqLM.from_pretrained(
         args.model_name,
         device_map="auto",
-        quantization_config=nf4_config,
+        quantization_config=quant_config,
         use_cache=False,
         cache_dir=cache_dir,
         # attn_implementation='flash_attention_2'  # not compatible with current versions of torch and cuda
@@ -130,10 +124,6 @@ model = get_peft_model(model, peft_config)
 print(f"\nModel device: {next(model.parameters()).device}", "\n")
 
 # Setup training
-eval_steps = None
-if args.eval_steps and args.eval_steps.strip():
-    eval_steps = int(args.eval_steps)
-
 sft_config = SFTConfig(
     output_dir=output_dir,
     num_train_epochs=args.epochs,
@@ -145,9 +135,9 @@ sft_config = SFTConfig(
     save_strategy="epoch",
     do_eval=True,
     eval_strategy=args.eval_strategy,
-    eval_steps=eval_steps,
+    eval_steps=args.eval_steps if args.eval_steps else None,
     learning_rate=args.learning_rate,
-    bf16=True,
+    bf16=args.bf16_for_compute,
     lr_scheduler_type="constant",
     max_seq_length=args.max_seq_length,
     packing=str_to_bool(args.packing),

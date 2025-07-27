@@ -21,3 +21,4 @@ from .prompts import generate_instruction_prompts
 from .login import login_to_hf
 from .convert import str_to_bool, read_shots, read_fuzzy
 from .parse import parse_arguments
+from .quantization import get_bnb_config
