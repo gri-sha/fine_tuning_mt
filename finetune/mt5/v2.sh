@@ -20,7 +20,7 @@ python3 finetune/finetuning.py \
     --lora-bias "none" \
     --lora-task "SEQ_2_SEQ_LM" \
     --epochs 2 \
-    --learning-rate 2e-3 \
+    --learning-rate 2e-4 \
     --batch-size 32 \
     --packing "false" \
     --bf16-for-compute "true" \
