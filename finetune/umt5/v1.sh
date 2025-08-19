@@ -1,15 +1,15 @@
 #!/bin/bash
 
-OUTPUT_DIR="sft_checkpoints/mistral7b/v1"
+OUTPUT_DIR="sft_checkpoints/umt5/v1"
 mkdir -p "$OUTPUT_DIR"
 
 python3 finetune/finetuning.py \
-    --model-name "mistralai/Mistral-7B-v0.1" \
+    --model-name "google/umt5-xl" \
     --output-dir "$OUTPUT_DIR" \
     --shots "0 1" \
     --fuzzy "f t" \
     --bos_token "true" \
-    --eos-token "false" \
+    --eos-token "true" \
     --pad-side "right" \
     --quantization "4bit" \
     --double_quant "true" \
@@ -18,17 +18,18 @@ python3 finetune/finetuning.py \
     --lora-dropout 0.1 \
     --lora-rank 64 \
     --lora-bias "none" \
-    --lora-task "CAUSAL_LM" \
-    --epochs 1 \
+    --lora-task "SEQ_2_SEQ_LM" \
+    --epochs 2 \
     --learning-rate 2e-3 \
-    --batch-size 32 \
-    --packing "true" \
+    --batch-size 16 \
+    --packing "false" \
     --bf16-for-compute "true" \
     --max-seq-length 512 \
-    --logging-steps 20 \
-    --completion-only-loss "false" \
+    --logging-steps 32 \
+    --completion-only-loss "true" \
     --warmup-steps 0 \
-    --eval-strategy "epoch" \
-
+    --eval-strategy "steps" \
+    --eval-steps 96 \
+    --save-strategy "epoch"
 
 # max_tokens for translation of the test dataset: 30

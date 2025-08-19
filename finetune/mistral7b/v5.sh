@@ -29,6 +29,7 @@ python3 finetune/finetuning.py \
     --completion-only-loss "true" \
     --warmup-steps 0 \
     --eval-strategy "steps" \
-    --eval-steps 64
+    --eval-steps 64 \
+    --save-strategy "epoch"
 
 # max_tokens for translation of the test dataset: 30

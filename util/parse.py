@@ -39,7 +39,9 @@ def parse_arguments():
     parser.add_argument("--logging-steps", type=int, default=20)
     parser.add_argument("--completion-only-loss", type=str, default="")
     parser.add_argument("--warmup-steps", type=int, default=0)
-    parser.add_argument("--eval-strategy", type=str, default="epoch", choices=["epoch", "steps"])
+    parser.add_argument("--eval-strategy", type=str, default="epoch", choices=["epoch", "steps", "no"])
     parser.add_argument("--eval-steps", type=int, default=0)
+    parser.add_argument("--save-strategy", type=str, default="epoch", choices=["epoch", "steps"])
+    parser.add_argument("--save-steps", type=int, default=0)
 
     return parser.parse_args()
