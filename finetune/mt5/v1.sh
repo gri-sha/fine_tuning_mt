@@ -2,6 +2,7 @@
 
 OUTPUT_DIR="sft_checkpoints/mt5/v1"
 mkdir -p "$OUTPUT_DIR"
+exec >"$OUTPUT_DIR/output.log" 2>&1
 
 python3 finetune/finetuning.py \
     --model-name "google/mt5-xl" \
@@ -21,7 +22,7 @@ python3 finetune/finetuning.py \
     --lora-task "SEQ_2_SEQ_LM" \
     --epochs 1 \
     --learning-rate 2e-4 \
-    --batch-size 32 \
+    --batch-size 16 \
     --packing "false" \
     --bf16-for-compute "true" \
     --max-seq-length 512 \

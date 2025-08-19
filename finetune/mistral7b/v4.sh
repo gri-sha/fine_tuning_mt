@@ -2,6 +2,7 @@
 
 OUTPUT_DIR="sft_checkpoints/mistral7b/v4"
 mkdir -p "$OUTPUT_DIR"
+exec >"$OUTPUT_DIR/output.log" 2>&1
 
 python3 finetune/finetuning.py \
     --model-name "mistralai/Mistral-7B-v0.1" \

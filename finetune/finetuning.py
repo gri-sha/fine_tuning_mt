@@ -109,7 +109,7 @@ tokenizer = AutoTokenizer.from_pretrained(
 )
 
 tokenizer.pad_token = tokenizer.eos_token
-tokenizer.padding_side = args.padding_side
+tokenizer.padding_side = args.pad_side
 
 peft_config = LoraConfig(
     lora_alpha=args.lora_alpha,
