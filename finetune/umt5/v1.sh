@@ -2,7 +2,7 @@
 
 OUTPUT_DIR="sft_checkpoints/umt5/v1"
 mkdir -p "$OUTPUT_DIR"
-exec >"$OUTPUT_DIR/output.log" 2>&1
+exec > >(tee -a "$OUTPUT_DIR/output.log") 2>&1
 
 python3 finetune/finetuning.py \
     --model-name "google/umt5-xl" \
