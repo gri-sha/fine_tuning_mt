@@ -137,6 +137,7 @@ peft_config = LoraConfig(
     r=args.lora_rank,
     bias=args.lora_bias,
     task_type=args.lora_task,
+    target_modules=args.lora_targets,
 )
 
 model = prepare_model_for_kbit_training(model)

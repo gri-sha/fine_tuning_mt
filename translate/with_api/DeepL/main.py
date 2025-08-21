@@ -40,5 +40,6 @@ df = pd.DataFrame({
     "translations": translations
 })
 
-os.makedirs(config["translations_dir"], exist_ok=True)
-df.to_csv(os.path.join(config["translations_dir"], config["translations_file"]), index=False)
+directory, _ = os.path.split(config["translations_path"])
+os.makedirs(directory, exist_ok=True)
+df.to_csv(config["translations_path"], index=False)

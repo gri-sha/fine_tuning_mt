@@ -5,32 +5,32 @@ mkdir -p "$OUTPUT_DIR"
 exec > >(tee -a "$OUTPUT_DIR/output.log") 2>&1
 
 python3 finetune/finetuning.py \
-    --model-name "google/umt5-xl" \
+    --model-name google/umt5-xl \
     --output-dir "$OUTPUT_DIR" \
-    --shots "0 1" \
-    --fuzzy "f t" \
-    --bos-token "true" \
-    --eos-token "true" \
-    --pad-side "right" \
-    --quantization "4bit" \
-    --double-quant "true" \
-    --quant-type "nf4" \
+    --shots 0 1 \
+    --fuzzy f t \
+    --bos-token true \
+    --eos-token false \
+    --pad-side right \
+    --quantization 4bit \
+    --double-quant true \
+    --quant-type nf4 \
     --lora-alpha 16 \
     --lora-dropout 0.1 \
     --lora-rank 64 \
-    --lora-bias "none" \
-    --lora-task "SEQ_2_SEQ_LM" \
+    --lora-bias none \
+    --lora-task SEQ_2_SEQ_LM \
     --epochs 2 \
     --learning-rate 2e-3 \
     --batch-size 16 \
-    --packing "false" \
-    --bf16-for-compute "true" \
+    --packing false \
+    --bf16-for-compute true \
     --max-seq-length 512 \
     --logging-steps 32 \
-    --completion-only-loss "true" \
+    --completion-only-loss true \
     --warmup-steps 0 \
-    --eval-strategy "steps" \
+    --eval-strategy steps \
     --eval-steps 96 \
-    --save-strategy "epoch"
+    --save-strategy epoch
 
 # max_tokens for translation of the test dataset: 30

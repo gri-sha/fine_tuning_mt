@@ -32,12 +32,7 @@ source .venv/bin/activate
 2. Make the script executable and run it:
 ```bash
 chmod +x finetune/mistral7b/v3.sh
-nohup ./finetune/mistral7b/v3.sh > sft_checkpoints/mistral7b/v3/output.log 2>&1 &
-```
-
-3. Monitor the logs:
-```bash
-tail -f sft_checkpoints/mistral7b/v3/output.log
+nohup ./finetune/mistral7b/v3.sh &
 ```
 
 4. Detach from the screen session with `Ctrl+A+D`

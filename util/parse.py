@@ -53,7 +53,7 @@ def parse_arguments() -> argparse.Namespace:
     parser.add_argument("--bf16-for-compute", type='boolean', default=True)
     parser.add_argument("--max-seq-length", type=int, default=512)
     parser.add_argument("--logging-steps", type=int, default=20)
-    parser.add_argument("--completion-only-loss", type=str, default=False)
+    parser.add_argument("--completion-only-loss", type='boolean', default=False)
     parser.add_argument("--warmup-steps", type=int, default=0)
     parser.add_argument("--eval-strategy", type=str, default="epoch", choices=["epoch", "steps", "no"])
     parser.add_argument("--eval-steps", type=int, default=0)
