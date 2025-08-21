@@ -1,8 +1,4 @@
-model: "mistralai/Mistral-7B-v0.1"
 checkpoint_path: "sft_checkpoints/mistral7b/v2/checkpoint-90"
-translations_dir: "translate/translations/"
-translations_file: "mistral7b_v2_translations.csv"
+translations_path: "translate/translations/mistral7b_v2_translations.csv"
 max_new_tokens: 30
 bath_size: 16
-bos_token: true
-eos_token: false

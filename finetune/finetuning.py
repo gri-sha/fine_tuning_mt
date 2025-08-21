@@ -10,6 +10,7 @@ from transformers import (
     AutoTokenizer,
     AutoModelForCausalLM,
     AutoModelForSeq2SeqLM,
+    BitsAndBytesConfig
 )
 from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
 from trl import SFTTrainer, SFTConfig
@@ -24,10 +25,6 @@ from util import (
     login_to_hf,
     _config,
     parse_arguments,
-    get_bnb_config,
-    str_to_bool,
-    read_shots,
-    read_fuzzy,
     SEED,
     TEST_SPLIT,
     VALID_SPLIT,
@@ -66,9 +63,15 @@ df_train, _ = initialize_dfs(test=TEST_SPLIT)
 prompts = []
 completions = []
 
-shots = read_shots(args.shots)
-fuzzy = read_fuzzy(args.fuzzy)
+shots = args.shots
+fuzzy = args.fuzzy
+
+if len(shots) != len(fuzzy):
+    raise ValueError("The number of 'shots' must match the number of 'fuzzy' values.")
+
 for s, f in zip(shots, fuzzy):
+    if f is None and s != 0:
+        raise ValueError("If 'fuzzy' is None, 'shots' must be 0.")
     _, p, c = generate_instruction_prompts(df_train, shots=s, fuzzy=f)
     prompts.extend(p)
     completions.extend(c)
@@ -77,7 +80,23 @@ dataset = Dataset.from_dict({"prompt": prompts, "completion": completions})
 dataset = validation_split(dataset, validation=VALID_SPLIT)
 pprint(dataset)
 
-quant_config = get_bnb_config(args)
+quant_config = None
+if args.quantization == "4bit":
+    quant_config = BitsAndBytesConfig(
+        load_in_4bit=True,
+        bnb_4bit_compute_dtype=(
+            torch.bfloat16 if args.bf16_for_compute else None
+        ),
+        bnb_4bit_quant_type=args.quant_type,
+        bnb_4bit_use_double_quant=args.double_quant,
+    )
+elif args.quantization == "8bit":
+    quant_config = BitsAndBytesConfig(
+        load_in_8bit=True,
+        llm_int8_threshold=args.llm_int8_threshold,
+        llm_int8_has_fp16_weight=args.llm_int8_has_fp16_weight,
+        llm_int8_skip_modules=args.llm_int8_skip_modules
+    )
 
 # if there is an error, that directories related to cuda are not found, the easiest solution is to reinstall bitsandbytes
 if args.lora_task == "CAUSAL_LM":
@@ -104,8 +123,9 @@ else:
 tokenizer = AutoTokenizer.from_pretrained(
     args.model_name,
     cache_dir=cache_dir,
-    add_bos_token=str_to_bool(args.bos_token),
-    add_eos_token=str_to_bool(args.bos_token),
+    add_bos_token=args.bos_token,
+    add_eos_token=args.eos_token,
+    legacy=False,
 )
 
 tokenizer.pad_token = tokenizer.eos_token
@@ -141,8 +161,9 @@ sft_config = SFTConfig(
     bf16=args.bf16_for_compute,
     lr_scheduler_type="constant",
     max_seq_length=args.max_seq_length,
-    packing=str_to_bool(args.packing),
-    completion_only_loss=str_to_bool(args.completion_only_loss),
+    packing=args.packing,
+    completion_only_loss=args.completion_only_loss,
+    dataset_kwargs={"add_special_tokens": False},
 )
 
 trainer = SFTTrainer(
@@ -153,6 +174,10 @@ trainer = SFTTrainer(
     train_dataset=dataset["train"],
     eval_dataset=dataset["validation"],
 )
+
+# for _ in range(4):
+#     print(tokenizer.decode(trainer.train_dataset["input_ids"][_], skip_special_tokens=False), "\n")
+# sys.exit(0)
 
 # Start training
 trainer.train()

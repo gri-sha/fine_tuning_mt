@@ -1,8 +1,9 @@
 import os
 import sys
 import yaml
+import json
 from peft import PeftModel, PeftConfig
-from transformers import set_seed, AutoModelForCausalLM, AutoTokenizer
+from transformers import set_seed, AutoModelForCausalLM, AutoModelForSeq2SeqLM, AutoTokenizer
 from datasets import Dataset
 from pprint import pprint
 
@@ -13,6 +14,9 @@ from util import generate_instruction_prompts, initialize_dfs, SEED, TEST_SPLIT
 
 with open("translate/translations_config.yml", "r") as f:
     tr_config = yaml.safe_load(f)
+
+with open(os.path.join(tr_config["checkpoint_path"], "tokenizer_config.json"), "r") as f:
+    tok_config = json.load(f)
 
 cache_dir = os.path.expanduser("~/.cache/huggingface/")
 
@@ -31,20 +35,29 @@ dataset = Dataset.from_dict(
 )
 pprint(dataset)
 
-peftconfig = PeftConfig.from_pretrained(tr_config["model_checkpoint"])
+peftconfig = PeftConfig.from_pretrained(tr_config["checkpoint_path"])
 
-model_base = AutoModelForCausalLM.from_pretrained(
-    peftconfig.base_model_name_or_path, device_map="auto", cache_dir=cache_dir
-)
+if peftconfig.task_type == "SEQ_2_SEQ_LM":
+    model_base = AutoModelForSeq2SeqLM.from_pretrained(
+        peftconfig.base_model_name_or_path, device_map="auto", cache_dir=cache_dir
+    )
+elif peftconfig.task_type == "CAUSAL_LM":
+    model_base = AutoModelForCausalLM.from_pretrained(
+        peftconfig.base_model_name_or_path, device_map="auto", cache_dir=cache_dir
+    )
+else: 
+    raise ValueError(f"Unknown model task: {peftconfig.task_type}")
 
 tokenizer = AutoTokenizer.from_pretrained(
-    tr_config["model_name"],
+    peftconfig.base_model_name_or_path,
     cache_dir=cache_dir,
-    add_bos_token=tr_config["bos_token"],
-    add_eos_token=tr_config["eos_token"],  # always False for inference
+    add_bos_token=tok_config["add_bos_token"],
+    add_eos_token=tok_config["add_eos_token"],
+    legacy=False
 )
+
 tokenizer.pad_token = tokenizer.eos_token
-model = PeftModel.from_pretrained(model_base, tr_config["model_checkpoint"])
+model = PeftModel.from_pretrained(model_base, tr_config["checkpoint_path"])
 print("Peft model loaded")
 
 def generate_response(prompt, model):
@@ -62,8 +75,10 @@ def generate_response(prompt, model):
     decoded_output = tokenizer.batch_decode(generated_ids)
     return decoded_output[0].replace(prompt, "")
 
-pprint(dataset["prompts"][35])
+SENTENCE_NUM = 247
 
-response = generate_response(dataset["prompts"][35], model)
-print(f"Reference: {dataset['references'][35]}")
+pprint(dataset["prompts"][SENTENCE_NUM])
+
+response = generate_response(dataset["prompts"][SENTENCE_NUM], model)
+print(f"Reference: {dataset['references'][SENTENCE_NUM]}")
 print(f"Response: {response}")

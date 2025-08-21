@@ -9,11 +9,11 @@ python3 finetune/finetuning.py \
     --output-dir "$OUTPUT_DIR" \
     --shots "0 1" \
     --fuzzy "f t" \
-    --bos_token "true" \
+    --bos-token "true" \
     --eos-token "true" \
     --pad-side "right" \
     --quantization "4bit" \
-    --double_quant "true" \
+    --double-quant "true" \
     --quant-type "nf4" \
     --lora-alpha 16 \
     --lora-dropout 0.1 \
