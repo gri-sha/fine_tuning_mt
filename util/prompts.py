@@ -1,20 +1,24 @@
 from pandas import DataFrame
 import random
+from . import LIMIT_NUM_FUZZY_MATCHES
 
-def generate_instruction_prompts(
+def _generate_instruction_prompts(
     df: DataFrame, shots: int = 0, fuzzy: bool = True
 ) -> list[str, str]:
     """
     Generates prompts in "instruction" format.
     Can
     Returns a tuple of lists:
-    - list of English sentences (sources): "This is a car" 
+    - list of English sentences (sources): "This is a car"
     - list of few-shot prompts: "<translations examples> English: This is a car\nFrench: ",
     - list French translated sentences (references or completions <=> "ideal generated text"): "C'est une voiture"
     """
     if shots < 0:
         raise ValueError('Argument "shots" must be non-negative integer')
 
+    if shots > LIMIT_NUM_FUZZY_MATCHES and fuzzy:
+        ValueError(f"Warning: Number of shots ({shots}) exceeds limit of {LIMIT_NUM_FUZZY_MATCHES}.")
+        
     prompts = []
 
     for i in range(len(df)):

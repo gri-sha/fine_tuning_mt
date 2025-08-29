@@ -1,70 +1,53 @@
 # Machine Translation Fine-Tuning
+Comparison on on custom dataset of finetuned smaller models against popular LLMs.
 
-## Overview
-This repository provides scripts for fine-tuning machine translation models (Mistral-7B and mT5) on a custom dataset.
-The fine-tuned models are tested and evaluated, with comparisons against reference translations from DeepL and MistralAI (Mistral Medium).
+## Installation
 
-## Quick Start
-
-1. Clone the repository:
 ```bash
-git clone https://github.com/gri-sha/fine_tuning_mt.git
-cd fine_tuning_mt
-```
-
-2. Set up the virtual environment:
-```bash
-python3 -m venv .venv
-source .venv/bin/activate
+git clone https://github.com/gri-sha/fine_tuning_mt.git && cd fine_tuning_mt
+python3 -m venv .venv && source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-## Usage Guide
+## Workflow
 
-### Fine-Tuning Models
-
-1. Start a new screen session:
+### Model Fine-Tuning
+Execute model-specific training configurations:
 ```bash
-screen -S finetuning
-source .venv/bin/activate
+bash finetune/<model>/<version>.sh
 ```
 
-2. Make the script executable and run it:
+Training scripts contain hyperparameter configurations and dataset specifications. Utilize `nohup` for long-running training processes.
+
+### Translation Generation
+
+**Fine-tuned models:**
 ```bash
-chmod +x finetune/mistral7b/v3.sh
-nohup ./finetune/mistral7b/v3.sh &
+bash translate/<model>/<version>.sh
 ```
 
-4. Detach from the screen session with `Ctrl+A+D`
-
-### Generating Translations
-
-1. Start a new screen session:
+**APIs:**
 ```bash
-screen -S translation
-source .venv/bin/activate
+python3 translate/api/<name>/run.py
 ```
 
-2. Configure the translation parameters in `translate/translations_config.yml`
+### Evaluation
 
-3. Run the translation script:
+1. Configure evaluation parameters in `evaluate/eval_config.yml`:
+
+2. Execute evaluation:
 ```bash
-nohup python3 translate/main.py &
+python3 evaluate/run.py
 ```
 
-4. Detach from the screen session with `Ctrl+A+D`
+Results are exported to `results/evaluation.csv`.
+Performance metrics used: BLEU, chrF++, TER, COMET.
 
-### Evaluating Results
+## References
 
-1. Configure the evaluation parameters in `evaluate/eval_config.yml`
+- Moslem et al. (2023). [Adaptive Machine Translation with LLMs](https://doi.org/10.48550/arXiv.2301.13294)
+- Moslem et al. (2023). [Fine-tuning LLMs for Adaptive MT](https://doi.org/10.48550/arXiv.2312.12740)
 
-2. Run the evaluation script:
-```bash
-python3 evaluate/main.py
-```
+## Implementation
 
-## Notes
-- For convinience it it better to run all the scripts from the **project root**
-- For long-running processes (fine-tuning and translation), it's recommended to use `screen` or `tmux` to maintain sessions
-- Check the model-specific shell scripts in `finetune/mistral7b/` and `finetune/mt5/` for additional configuration details
-- Evaluation results are saved in `evaluate/evaluations.csv`
+- Based on: [ymoslem/Adaptive-MT-LLM-Fine-tuning](https://github.com/ymoslem/Adaptive-MT-LLM-Fine-tuning)

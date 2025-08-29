@@ -50,7 +50,6 @@ seg_scores, sys_score = model.predict(data, batch_size=128, gpus=1).values()
 comet = round(sys_score * 100, 2)
 print("COMET:", comet)
 
-
 df = (
     pd.read_csv(eval_config["evaluations_path"])
     if os.path.exists(eval_config["evaluations_path"])
@@ -58,7 +57,7 @@ df = (
 )
 
 new_row = {
-    "model_name": eval_config["eval_name"],
+    "name": eval_config["eval_name"],
     "BLEU": bleu,
     "chrF++": chrf,
     "TER": ter,

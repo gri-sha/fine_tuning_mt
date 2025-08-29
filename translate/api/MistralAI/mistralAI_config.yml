@@ -1,0 +1,12 @@
+model: "mistral-medium-latest" # mistral-medium-2505
+max_tokens: 128
+temperature: 0.7
+shots: [0, 1]
+fuzzy: [null, true]
+system_prompt: "You are a helpful assistant that translates English to French. Output only the french sentence no explanations. Copy translation style from examples if provided."
+translations_path: "translate/results/mistral_medium_translations.csv"
+batch_dir: "translate/with_api/MistralAI/batches"
+batch_file: "batch.jsonl"
+batch_results_file: "batch_results.jsonl"
+endpoint: "/v1/chat/completions"
+check_interval: 5

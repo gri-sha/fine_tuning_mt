@@ -7,3 +7,7 @@ other
 .ipynb_checkpoints
 comet
 sft_checkpoints
+old_sft_checkpoints
+__pycache__
+*.pkl
+batches

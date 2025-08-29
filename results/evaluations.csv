@@ -1,0 +1,13 @@
+name,BLEU,chrF++,TER,COMET
+mistral7b_v1_old,31.68,47.47,74.72,-32.9
+mistral7b_v2_old,25.43,43.81,83.55,-50.9
+mistral7b_v3_old,31.4,47.59,69.91,-17.9
+deepl_quality_optimized_old,47.8,65.58,44.02,70.94
+mistral_medium_old,49.03,64.42,42.72,60.81
+mistral7b_v4.1_old,29.54,49.55,60.01,-1.1
+mistral7b_v5_old,29.21,49.58,62.68,-5.31
+mistral7b_v4.2_old,29.54,49.55,60.01,-1.1
+mistral_medium,44.85,64.1,45.22,66.65
+deepl_quality_optimized,44.47,63.08,47.07,67.44
+mistral7b_v1,34.47,53.08,61.33,14.71
+mistral7b_v2,33.51,52.93,63.31,13.34

@@ -1,18 +1,28 @@
-## Machine Translation Fine-tuning of Mistral-7B
+# Mistral-7B-v0.3 Finetuning Configuration
 
-| Version | Base Model | Comp. Only Loss | Quant. | Epochs | Shots Included | Packing | Batch Size | Learning Rate | Notes |
-| -- | -- | -- | -- | -- | -- | -- | -- | -- | -- |
-| **V1** | v0.1 | False | 4-bit | 1 | 0, 1 | Yes | 32 | 1e-4 | <ul><li>Poor results</li><li>FlashAttention 2 incompatible</li></ul> |
-| **V2** | v0.1 | False | 4-bit | 1 | 0, 1 | Yes | 32 | 2e-3 | <ul><li>Poor results</li><li>FlashAttention 2 incompatible</li></ul> |
-| **V3** | v0.1 | True | 4-bit | 2 | 0, 1 | No | 64 | 2e-3 | <ul><li>Poor results</li><li>FlashAttention 2 incompatible</li><li>More validation</li></ul> |
-| **V4** | v0.1 | True | 4-bit | 3 | 0, 1, 2 | No | 64 | 2e-3 | <ul><li>Proper setup</li></ul> |
-| **V5** | v0.3 | True | 4-bit | 3 | 0, 1, 2 | No | 64 | 2e-4 | <ul><li>Updated model version</li></ul> |
+## Overview
+Configuration notes for the Mistral-7B-v0.3 decoder-only model tokenizer setup.
 
-## References
+## Key Configuration Details
 
-* Moslem et al. (2023). [Adaptive Machine Translation with LLMs](https://doi.org/10.48550/arXiv.2301.13294)
-* Moslem et al. (2023). [Fine-tuning LLMs for Adaptive MT](https://doi.org/10.48550/arXiv.2312.12740)
+### Model Architecture
+- **Model Type**: Decoder-only architecture
+- **Packing**: Not used due to compatibility issues between Flash Attention 2 and current torch/CUDA versions
 
-## Implementation
+### Tokenizer Settings
+- `add_eos_token`: `false` (SFTTrainer automatically handles EOS token addition, when LlamaTokenizer(Fast) is used)
+- `add_bos_token`: `true` (BOS token is applicable and should be added)
+- **Fast Tokenizer**: Supported and can be used for improved performance
 
-* Based on: [ymoslem/Adaptive-MT-LLM-Fine-tuning](https://github.com/ymoslem/Adaptive-MT-LLM-Fine-tuning)
+### Token Configuration
+- **PAD Token**: `</s>` (same as EOS token)
+- **BOS Token**: `<s>`
+- **EOS Token**: `</s>`
+
+### Padding Configuration
+- **Training**: Right-side padding
+- **Inference**: Left-side padding
+
+
+## Notes
+The tokenizer maintains consistency by using the same token (`</s>`) for both padding and end-of-sequence marking. The automatic EOS token handling by SFTTrainer eliminates the need for manual EOS token addition during training.

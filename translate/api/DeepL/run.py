@@ -9,12 +9,12 @@ from pathlib import Path
 project_root = Path(__file__).resolve().parents[3]
 sys.path.append(str(project_root))
 
-from util import initialize_dfs, TEST_SPLIT
+from util import _initialize_dfs
 
-with open("translate/with_api/DeepL/DeepL_config.yml", "r") as f:
+with open("translate/with_api/DeepL/deepl_config.yml", "r") as f:
     config = yaml.safe_load(f)
 
-_, df_test = initialize_dfs(test=TEST_SPLIT)
+_, _, df_test = _initialize_dfs()
 
 load_dotenv()
 translator = deepl.Translator(os.getenv("DEEPL_API_KEY"))
