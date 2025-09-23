@@ -25,7 +25,19 @@ from .read_data import (
     _initialize_dfs,
 )
 from .login import login_to_hf
-from .parse import parse_training_arguments, parse_translation_arguments
-from .prompts import _generate_instruction_prompts
+from .parse import (
+    parse_training_arguments,
+    parse_translation_arguments,
+    parse_evaluation_arguments,
+)
+from .prompts import _generate_instruction_prompts, get_prompt_generator
 from .clean import clean_response
 from .metrics import plot_log_metrics
+from .inference import generate_batch_responses, generate_response
+from .model import (
+    get_quant_config,
+    get_peft_config,
+    load_model,
+    load_tokenizer,
+    check_cuda_availability,
+)

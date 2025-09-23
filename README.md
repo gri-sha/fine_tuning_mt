@@ -59,15 +59,13 @@ python3 translate/api/<name>/run.py
 
 ### Evaluation
 
-1. Configure evaluation parameters in `evaluate/eval_config.yml`:
-
-2. Execute evaluation:
+Execute evaluation on all translation .csv files in a folder:
 ```bash
-python3 evaluate/run.py
+python3 evaluate/run.py --tr-dir "<path/to/folder/with/translations>"
 ```
 
 Results are exported to `results/evaluation.csv`.
-Performance metrics used: BLEU, chrF++, TER, COMET.
+Performance metrics used: BLEU, chrF++, TER, COMET, BERTScore.
 
 ## References
 

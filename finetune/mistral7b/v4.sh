@@ -1,14 +1,16 @@
 #!/bin/bash
 
-OUTPUT_DIR="sft_checkpoints/mistral7b/v1"
+# misleading configuration for the model 
+
+OUTPUT_DIR="sft_checkpoints/mistral7b/v4"
 mkdir -p "$OUTPUT_DIR"
 exec > >(tee -a "$OUTPUT_DIR/output.log") 2>&1
 
 python3 finetune/finetuning.py \
     --model-name mistralai/Mistral-7B-v0.3 \
     --output-dir "$OUTPUT_DIR" \
-    --shots 0 \
-    --fuzzy _ \
+    --shots 0 1 2\
+    --fuzzy _ t t\
     --val-shots 0 1 \
     --val-fuzzy _ t \
     --add-bos-token true \
@@ -23,8 +25,8 @@ python3 finetune/finetuning.py \
     --lora-rank 64 \
     --lora-bias none \
     --lora-task CAUSAL_LM \
-    --epochs 3 \
-    --learning-rate 2e-4 \
+    --epochs 2 \
+    --learning-rate 2e-3 \
     --batch-size 32 \
     --gradient-accumulation-steps 1 \
     --packing false \

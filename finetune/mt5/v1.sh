@@ -9,6 +9,8 @@ python3 finetune/finetuning.py \
     --output-dir "$OUTPUT_DIR" \
     --shots 0 \
     --fuzzy _ \
+    --val_shots 0 1 \
+    --val_fuzzy _ t \
     --add-eos-token false \
     --use-fast-tokenizer false \
     --quantization 4bit \
@@ -19,10 +21,10 @@ python3 finetune/finetuning.py \
     --lora-rank 64 \
     --lora-bias none \
     --lora-task SEQ_2_SEQ_LM \
-    --epochs 2 \
-    --learning-rate 2e-4 \
-    --batch-size 8 \
-    --packing true \
+    --epochs 3 \
+    --learning-rate 1e-4 \
+    --batch-size 16 \
+    --packing false \
     --bf16-for-compute true \
     --max-seq-length 512 \
     --logging-steps 24 \

@@ -1,8 +1,8 @@
 #!/bin/bash
 
 python3 translate/translation.py \
-    --checkpoint-path "sft_checkpoints/mistral7b/v2/checkpoint-591" \
-    --translations-path "results/translations/mistral7b/v2.csv" \
+    --checkpoint-path "sft_checkpoints/mistral7b/v3_v4/best_loss_step_576_v3" \
+    --translations-path "results/translations/mistral7b/v3_best.csv" \
     --shots 0 1\
     --fuzzy _ t\
     --max-new-tokens 128 \
@@ -10,8 +10,8 @@ python3 translate/translation.py \
     --use-batches true \
     --add-bos-token true \
     --add-eos-token false \
-    --use-fast-tokenizer false \
+    --use-fast-tokenizer true \
     --pad-side left \
-    --pad-token "<\s>" \
-    --do-tokenizer-check true \
+    --pad-token "</s>" \
+    --do-inference-check true \
     --do-translation true \

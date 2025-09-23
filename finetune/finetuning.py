@@ -1,18 +1,12 @@
 import os
 import sys
 import json
+import shutil
 import random
 import itertools
-from pathlib import Path
 from pprint import pprint
-import torch
-from transformers import (
-    AutoTokenizer,
-    AutoModelForCausalLM,
-    AutoModelForSeq2SeqLM,
-    BitsAndBytesConfig,
-)
-from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training
+from torch import where, any
+from transformers import TrainerCallback
 from trl import SFTTrainer, SFTConfig
 from pathlib import Path
 
@@ -24,6 +18,11 @@ from util import (
     parse_training_arguments,
     plot_log_metrics,
     dataset_config,
+    get_quant_config,
+    get_peft_config,
+    load_model,
+    load_tokenizer,
+    check_cuda_availability,
 )
 
 # Load arguments
@@ -45,93 +44,29 @@ pprint(args.__dict__)
 
 # Login to Hugging Face
 login_to_hf()
-
-# Check CUDA availability
-if not torch.cuda.is_available():
-    print("\nWarning: CUDA is not available.", "\n")
-else:
-    print(f"\nCUDA device: {torch.cuda.get_device_name(0)}", "\n")
+check_cuda_availability()
 
 # Load data
-dataset = create_train_dataset(args.shots, args.fuzzy)
+dataset = create_train_dataset(
+    shots=args.shots,
+    fuzzy=args.fuzzy,
+    val_shots=args.val_shots if args.val_shots is not None else args.shots,
+    val_fuzzy=args.val_fuzzy if args.val_fuzzy is not None else args.fuzzy,
+)
 pprint(dataset)
 
 # Setup quantization
-quant_config = None
-if args.quantization == "4bit":
-    quant_config = BitsAndBytesConfig(
-        load_in_4bit=True,
-        bnb_4bit_compute_dtype=(torch.bfloat16 if args.bf16_for_compute else None),
-        bnb_4bit_quant_type=args.quant_type,
-        bnb_4bit_use_double_quant=args.double_quant,
-    )
-elif args.quantization == "8bit":
-    quant_config = BitsAndBytesConfig(
-        load_in_8bit=True,
-        llm_int8_threshold=args.llm_int8_threshold,
-        llm_int8_has_fp16_weight=args.llm_int8_has_fp16_weight,
-        llm_int8_skip_modules=args.llm_int8_skip_modules,
-    )
+quant_config = get_quant_config(args)
+pprint(quant_config)
 
-# Setup LoRA
+# LoRA setup
+peft_config = get_peft_config(args)
+pprint(peft_config)
+
+# Load model and tokenizer
 # if there is an error, that directories related to cuda are not found, the easiest solution is to reinstall bitsandbytes
-if args.lora_task == "CAUSAL_LM":
-    model = AutoModelForCausalLM.from_pretrained(
-        args.model_name,
-        device_map="auto",
-        quantization_config=quant_config,
-        use_cache=False,
-        cache_dir=cache_dir,
-        # attn_implementation='flash_attention_2'  # not compatible with current versions of torch and cuda
-    )
-elif args.lora_task == "SEQ_2_SEQ_LM":
-    model = AutoModelForSeq2SeqLM.from_pretrained(
-        args.model_name,
-        device_map="auto",
-        quantization_config=quant_config,
-        use_cache=False,
-        cache_dir=cache_dir,
-        # attn_implementation='flash_attention_2'  # not compatible with current versions of torch and cuda
-    )
-else:
-    raise ValueError("LoRA task type is not supported yet.")
-
-# Setup peft configuration
-peft_config = LoraConfig(
-    lora_alpha=args.lora_alpha,
-    lora_dropout=args.lora_dropout,
-    r=args.lora_rank,
-    bias=args.lora_bias,
-    task_type=args.lora_task,
-    target_modules=args.lora_targets,
-)
-
-# Load model
-model = prepare_model_for_kbit_training(model)
-model = get_peft_model(model, peft_config)
-print(f"\nModel device: {next(model.parameters()).device}", "\n")
-
-
-# Setup tokenizer
-tokenizer = AutoTokenizer.from_pretrained(
-    args.model_name,
-    cache_dir=cache_dir,
-    legacy=False,
-    use_fast=args.use_fast_tokenizer,
-)
-
-if args.add_bos_token is not None:
-    tokenizer.add_bos_token = args.add_bos_token
-if args.bos_token is not None:
-    tokenizer.bos_token = args.bos_token
-if args.eos_token is not None:
-    tokenizer.eos_token = args.eos_token
-if args.add_eos_token is not None:
-    tokenizer.add_eos_token = args.add_eos_token
-if args.pad_token is not None:
-    tokenizer.pad_token = args.pad_token
-if args.pad_side:
-    tokenizer.padding_side = args.pad_side
+model = load_model(args, quant_config, peft_config, cache_dir, inference=False)
+tokenizer = load_tokenizer(args, cache_dir)
 
 # Setup training
 sft_config = SFTConfig(
@@ -157,7 +92,6 @@ sft_config = SFTConfig(
     completion_only_loss=args.completion_only_loss,
     label_names=["labels"],
 )
-
 pprint(sft_config)
 
 trainer = SFTTrainer(
@@ -169,13 +103,52 @@ trainer = SFTTrainer(
     eval_dataset=dataset["validation"],
 )
 
+# This callback saves the model checkpoint with least eval loss
+class SaveBestModelCallback(TrainerCallback):
+    def __init__(self, save_dir, trainer):
+        self.best_loss = float("inf")
+        self.save_dir = save_dir
+        self.trainer = trainer
+        self.last_checkpoint_path = None
+        os.makedirs(self.save_dir, exist_ok=True)
+    
+    # This method is called after evaluation 
+    def on_evaluate(self, args, state, control, metrics=None, **kwargs):
+        eval_loss = metrics.get("eval_loss")
+        print("Evaluation report:")
+        print(f"Current eval_loss: {eval_loss}")
+        
+        if eval_loss is not None and eval_loss < self.best_loss:
+            print(f"New best loss! Previous: {self.best_loss:.6f}, New: {eval_loss:.6f}")
+            self.best_loss = eval_loss
+            
+            # Delete previous checkpoint
+            if self.last_checkpoint_path and os.path.exists(self.last_checkpoint_path):
+                print(f"Removing previous checkpoint: {self.last_checkpoint_path}")
+                shutil.rmtree(self.last_checkpoint_path)
+            
+            # Save model
+            checkpoint_name = f"best_loss_step_{state.global_step}"
+            checkpoint_path = os.path.join(self.save_dir, checkpoint_name)
+            self.last_checkpoint_path = checkpoint_path
+            
+            print(f"Saving new best model to: {checkpoint_path}")
+            self.trainer.save_model(checkpoint_path)
+        else:
+            if eval_loss is not None:
+                print(f"Loss {eval_loss:.6f} >= best loss {self.best_loss:.6f}, not saving")
+
+        return control
+trainer.add_callback(SaveBestModelCallback(output_dir, trainer))
+
 # Tokenization check
-if args.do_tokenizer_check:
+if args.do_trainer_check:
     # NOTE: The following section displays the configuration provided to SFTTrainer.
+    # (regardless the 'processing_class' is used)
     # Be aware that these settings may be modified internally by the trainer.
     # The trainer may silently override these settings without any warnings.
     # Verify the tokenization examples below for correctness.
-    print(f"\nTokenizer: {tokenizer.__class__.__name__}")
+    print(f"\nTokenizer: {trainer.processing_class.__class__.__name__}")
     try:
         print(
             "BOS token:",
@@ -264,7 +237,7 @@ if args.do_tokenizer_check:
             print("Attention mask:")
             pprint(batch["attention_mask"][i])
             # find the eos tokens
-            eos_positions = torch.where(
+            eos_positions = where(
                 batch["input_ids"][i] == trainer.processing_class.eos_token_id
             )[0].tolist()
             if eos_positions:
@@ -278,7 +251,7 @@ if args.do_tokenizer_check:
             if eos_positions[0] < len(batch["attention_mask"][i]) - 1:
                 # Check all tokens after the first EOS position
                 rest_mask = batch["attention_mask"][i][eos_positions[0] + 1 :]
-                if torch.any(rest_mask != 0):
+                if any(rest_mask != 0):
                     print("Warning: Attention mask after EOS contains non-zero values!")
                     print("Attention mask after EOS:", rest_mask.tolist())
                 else:

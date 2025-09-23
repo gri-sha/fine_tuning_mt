@@ -1,0 +1,3 @@
+use_comet: true
+comet_dir: "comet"
+comet_model_name: "wmt20-comet-da"

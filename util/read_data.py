@@ -13,7 +13,7 @@ from util import (
 )
 from .fuzzy_matches import calculate_fuzzy_matches
 from .prompts import _generate_instruction_prompts
-from typing import Optional
+from typing import Optional, Callable
 
 
 def _split(df, train, validation, test):
@@ -110,21 +110,26 @@ def _initialize_dfs(recreate=False) -> tuple[pd.DataFrame]:
     df_val = pd.read_pickle(val_path)
     df_test = pd.read_pickle(test_path)
     print("Dataframes loaded.")
-    
+
     if df_train.empty or df_val.empty or df_test.empty:
         print("Warning: One of the dataframes is empty.")
     return df_train, df_val, df_test
 
 
 def _build_prompt_completion_dataset(
-    df_part, shots: list[int], fuzzy: list[Optional[bool]]
+    df_part: pd.DataFrame,
+    shots: list[int],
+    fuzzy: list[Optional[bool]],
+    prompt_generator: Callable[
+        [pd.DataFrame, list[int], list[Optional[bool]]], tuple[list[str]]
+    ] = _generate_instruction_prompts,
 ) -> Dataset:
     prompts = []
     completions = []
     for s, f in zip(shots, fuzzy):
         if f is None and s != 0:
             raise ValueError("If 'fuzzy' is None, 'shots' must be 0.")
-        _, p, c = _generate_instruction_prompts(df_part, shots=s, fuzzy=f)
+        _, p, c = prompt_generator(df_part, shots=s, fuzzy=f)
         prompts.extend(p)
         completions.extend(c)
     return Dataset.from_dict({"prompt": prompts, "completion": completions})
@@ -133,14 +138,29 @@ def _build_prompt_completion_dataset(
 def create_train_dataset(
     shots: list[int],
     fuzzy: list[Optional[bool]],
+    val_shots: list[int],
+    val_fuzzy: list[Optional[bool]],
+    prompt_generator: Callable[
+        [pd.DataFrame, list[int], list[Optional[bool]]], tuple[list[str]]
+    ] = _generate_instruction_prompts,
 ) -> DatasetDict:
     df_train, df_val, _ = _initialize_dfs()
-    train_dataset = _build_prompt_completion_dataset(df_train, shots, fuzzy)
-    val_dataset = _build_prompt_completion_dataset(df_val, shots, fuzzy)
+    train_dataset = _build_prompt_completion_dataset(
+        df_train, shots, fuzzy, prompt_generator
+    )
+    val_dataset = _build_prompt_completion_dataset(
+        df_val, val_shots, val_fuzzy, prompt_generator
+    )
     return DatasetDict({"train": train_dataset, "validation": val_dataset})
 
 
-def create_test_dataset(shots: list[int], fuzzy: list[Optional[bool]]) -> Dataset:
+def create_test_dataset(
+    shots: list[int],
+    fuzzy: list[Optional[bool]],
+    prompt_generator: Callable[
+        [pd.DataFrame, list[int], list[Optional[bool]]], tuple[list[str]]
+    ] = _generate_instruction_prompts,
+) -> Dataset:
     _, _, df_test = _initialize_dfs()
     sources = []
     references = []
@@ -154,7 +174,7 @@ def create_test_dataset(shots: list[int], fuzzy: list[Optional[bool]]) -> Datase
     for s, f in zip(shots, fuzzy):
         if f is None and s != 0:
             raise ValueError("If 'fuzzy' is None, 'shots' must be 0.")
-        s, p, r = _generate_instruction_prompts(df_test, shots=s, fuzzy=f)
+        s, p, r = prompt_generator(df_test, shots=s, fuzzy=f)
         sources.extend(s)
         references.extend(r)
         prompts.extend(p)
